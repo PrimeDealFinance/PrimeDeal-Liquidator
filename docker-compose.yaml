@@ -1,0 +1,55 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    container_name: nest-uni-postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5400:5432'
+
+  app:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: alexpvn69/position:latest
+    # image: w3achainowls/backend-app
+    container_name: nest-uni
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '80:3333'
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: watchtower
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: --interval 30 nest-uni
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: nest-uni-pgadmin4
+    env_file:
+      - .env
+    ports:
+      - '5050:8080'
+    depends_on:
+      - db
+
+  redis:  
+    image: redis:alpine3.14
+    restart: always
+    container_name: nest-uni-redis
+    ports:
+      - '6399:6379'
