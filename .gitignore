@@ -39,3 +39,9 @@ lerna-debug.log*
 transaction.ts
 seeder.ts
 .env
+seeders
+config
+migrations
+models 
+Dockerfile
+docker-compose.yaml

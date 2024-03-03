@@ -1,12 +1,10 @@
 import { Column, Model, Table } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'PoolsTable',
+  tableName: 'Pools',
 })
-export class PoolsTable extends Model<PoolsTable> {
-  @Column({
-    defaultValue: '0xeC617F1863bdC08856Eb351301ae5412CE2bf58B',
-  })
+export class Pools extends Model<Pools> {
+  @Column
   poolAddress: string;
   @Column({
     defaultValue: '0xeC617F1863bdC08856Eb351301ae5412CE2bf58B',
@@ -17,11 +15,15 @@ export class PoolsTable extends Model<PoolsTable> {
   })
   tokenBcontract: string;
   @Column({
-    defaultValue: '0xeC617F1863bdC08856Eb351301ae5412CE2bf58B',
+    defaultValue: 'ETH',
   })
   tokenAsymbol: string;
   @Column({
-    defaultValue: '0xeC617F1863bdC08856Eb351301ae5412CE2bf58B',
+    defaultValue: 'USDT',
   })
   tokenBsymbol: string;
+  @Column({
+    defaultValue: true,
+  })
+  isActive: boolean;
 }

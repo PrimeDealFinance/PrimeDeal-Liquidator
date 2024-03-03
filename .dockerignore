@@ -4,6 +4,13 @@ npm-debug.log
 yarn-error.log
 test
 dist
+seeders
+config
+migrations
+models 
+Dockerfile
+docker-compose.yaml
+
 
 # Environment files
 .env

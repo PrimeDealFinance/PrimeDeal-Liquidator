@@ -6,7 +6,7 @@ import {
 } from '@nestjs/bull';
 import { Job } from 'bull';
 import { PositionsService } from '../../positions/positions.service';
-import { POSITION_QUEUE } from '../constants';
+import { POSITION_QUEUE } from '../../common/constants';
 // import { Logger } from '@nestjs/common';
 
 @Processor(POSITION_QUEUE)
@@ -14,7 +14,7 @@ export class PositionConsumer {
   constructor(private readonly positionsService: PositionsService) {}
 
   @Process('openPosition')
-  async handlePositionCreation(job: Job) {
+  async handlePositionCreation(job: Job): Promise<{ status: string }> {
     try {
       const newPosition = job.data;
       await this.positionsService.createPosition(newPosition);
@@ -28,7 +28,9 @@ export class PositionConsumer {
   }
 
   @Process('changePositionStatus')
-  async handleChangeStatus(job: Job<{ positionId: number }>) {
+  async handleChangeStatus(
+    job: Job<{ positionId: number }>,
+  ): Promise<{ status: string }> {
     try {
       const { positionId } = job.data;
       await this.positionsService.changePositionStatus(positionId);

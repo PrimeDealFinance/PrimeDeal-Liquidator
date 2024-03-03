@@ -1,15 +1,17 @@
-import { RedisTestService } from './common/services/redis.service';
+import { RedisService } from './common/services/redis.service';
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PositionsService } from './positions/positions.service';
 import { ApiExcludeEndpoint, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { PositionManagerGateway } from './gateways/position-manager.gateway';
 
 @Controller('api')
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly redis: RedisTestService,
+    private readonly redis: RedisService,
     private readonly positionsService: PositionsService,
+    private positionManagerGateway: PositionManagerGateway,
   ) {}
   @ApiExcludeEndpoint()
   @Get()
@@ -40,5 +42,29 @@ export class AppController {
   @Get('/positions')
   getUPositions() {
     return this.positionsService.getPositions();
+  }
+  @ApiExcludeEndpoint()
+  @Get('/close')
+  async close() {
+    await this.positionManagerGateway.closeWebSocketConnection();
+    return 'WebSocket connection closed.';
+  }
+
+  @ApiExcludeEndpoint()
+  @Get('/redis')
+  async getPoolsFromRedis() {
+    return await this.redis.getActivePoolAddresses();
+  }
+
+  @ApiExcludeEndpoint()
+  @Get('/db')
+  async getPoolsFromDB() {
+    return await this.appService.activePools();
+  }
+
+  @ApiExcludeEndpoint()
+  @Get('/err')
+  async getErr() {
+    return await this.appService.getErr();
   }
 }

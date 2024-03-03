@@ -1,11 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { GlobalErrorFilter } from './common/services/globalError.filter';
+
+// process.on('uncaughtException', (exception) => {
+//   console.error('Unhandled Exception', exception);
+// });
+
+// process.on('unhandledRejection', (reason, promise) => {
+//   console.error('Unhandled Rejection', promise, 'reason:', reason);
+// });
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
-
+  app.useGlobalFilters(new GlobalErrorFilter());
   const config = new DocumentBuilder()
     .setTitle('UniSwap Position manager App')
     .setDescription('The app which makes you happy')
@@ -16,7 +24,6 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   app.enableCors();
-
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

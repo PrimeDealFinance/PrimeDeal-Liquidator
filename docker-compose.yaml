@@ -13,21 +13,25 @@ services:
       - '5400:5432'
 
   app:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: alexpvn69/position:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: alexpvn69/position:latest
     # image: w3achainowls/backend-app
     container_name: nest-uni
     restart: always
     env_file:
       - .env
+    environment:
+      - NODE_ENV=development
     ports:
       - '80:3333'
+      - '9229:9229'
     depends_on:
       - db
     volumes:
       - ./src:/app/src
+      - /app/node_modules
 
   # watchtower:
   #   image: containrrr/watchtower
@@ -36,18 +40,7 @@ services:
   #     - /var/run/docker.sock:/var/run/docker.sock
   #   command: --interval 30 nest-uni
 
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    container_name: nest-uni-pgadmin4
-    env_file:
-      - .env
-    ports:
-      - '5050:8080'
-    depends_on:
-      - db
-
-  redis:  
+  redis:
     image: redis:alpine3.14
     restart: always
     container_name: nest-uni-redis

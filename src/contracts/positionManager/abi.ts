@@ -7,11 +7,90 @@ const abi_position = [
         type: 'address',
       },
       { internalType: 'address', name: 'uniswapFactory_', type: 'address' },
+      { internalType: 'address', name: 'WETH_', type: 'address' },
+      { internalType: 'address', name: 'ETH_', type: 'address' },
     ],
     stateMutability: 'nonpayable',
     type: 'constructor',
   },
+  { inputs: [], name: 'ERC721EnumerableForbiddenBatchMint', type: 'error' },
+  {
+    inputs: [
+      { internalType: 'address', name: 'sender', type: 'address' },
+      { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+      { internalType: 'address', name: 'owner', type: 'address' },
+    ],
+    name: 'ERC721IncorrectOwner',
+    type: 'error',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: 'operator', type: 'address' },
+      { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+    ],
+    name: 'ERC721InsufficientApproval',
+    type: 'error',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'approver', type: 'address' }],
+    name: 'ERC721InvalidApprover',
+    type: 'error',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'operator', type: 'address' }],
+    name: 'ERC721InvalidOperator',
+    type: 'error',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
+    name: 'ERC721InvalidOwner',
+    type: 'error',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'receiver', type: 'address' }],
+    name: 'ERC721InvalidReceiver',
+    type: 'error',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+    name: 'ERC721InvalidSender',
+    type: 'error',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
+    name: 'ERC721NonexistentToken',
+    type: 'error',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: 'owner', type: 'address' },
+      { internalType: 'uint256', name: 'index', type: 'uint256' },
+    ],
+    name: 'ERC721OutOfBoundsIndex',
+    type: 'error',
+  },
+  { inputs: [], name: 'EnforcedPause', type: 'error' },
+  { inputs: [], name: 'ExpectedPause', type: 'error' },
+  {
+    inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+    type: 'error',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+    type: 'error',
+  },
+  { inputs: [], name: 'PositionManager__IncorrectClosure', type: 'error' },
+  {
+    inputs: [],
+    name: 'PositionManager__InsufficientMaticBalance',
+    type: 'error',
+  },
+  { inputs: [], name: 'PositionManager__StopPriceTooHigh', type: 'error' },
+  { inputs: [], name: 'PositionManager__StopPriceTooLow', type: 'error' },
   { inputs: [], name: 'R', type: 'error' },
+  { inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
   { inputs: [], name: 'T', type: 'error' },
   {
     anonymous: false,
@@ -196,6 +275,34 @@ const abi_position = [
     name: 'Unpaused',
     type: 'event',
   },
+  { stateMutability: 'payable', type: 'fallback' },
+  {
+    inputs: [],
+    name: '_ETH',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: '_WETH9',
+    outputs: [{ internalType: 'contract IWETH9', name: '', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: '_nonfungiblePositionManager',
+    outputs: [
+      {
+        internalType: 'contract INonfungiblePositionManager',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
   {
     inputs: [],
     name: '_uniswapFactory',
@@ -238,6 +345,13 @@ const abi_position = [
   },
   {
     inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
+    name: 'collect',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
     name: 'getApproved',
     outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
@@ -271,17 +385,19 @@ const abi_position = [
         components: [
           {
             components: [
-              {
-                internalType: 'enum PositionManager.PositionDirection',
-                name: 'positionDirection',
-                type: 'uint8',
-              },
               { internalType: 'uint256', name: 'amount', type: 'uint256' },
               {
                 internalType: 'uint256',
                 name: 'uniswapTokenId',
                 type: 'uint256',
               },
+              {
+                internalType: 'enum PositionManager.PositionDirection',
+                name: 'positionDirection',
+                type: 'uint8',
+              },
+              { internalType: 'bool', name: 'isNativeA', type: 'bool' },
+              { internalType: 'bool', name: 'isNativeB', type: 'bool' },
             ],
             internalType: 'struct PositionManager.Position',
             name: 'pos',
@@ -362,12 +478,12 @@ const abi_position = [
       { internalType: 'address', name: 'tokenB', type: 'address' },
       { internalType: 'uint24', name: 'fee', type: 'uint24' },
       { internalType: 'uint160', name: 'stopSqrtPriceX96', type: 'uint160' },
-      { internalType: 'uint256', name: 'amountA', type: 'uint256' },
-      { internalType: 'uint256', name: 'amountAMin', type: 'uint256' },
+      { internalType: 'uint256', name: 'amountB', type: 'uint256' },
+      { internalType: 'uint256', name: 'amountBMin', type: 'uint256' },
     ],
     name: 'openBuyPosition',
     outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
   },
   {
@@ -376,12 +492,12 @@ const abi_position = [
       { internalType: 'address', name: 'tokenB', type: 'address' },
       { internalType: 'uint24', name: 'fee', type: 'uint24' },
       { internalType: 'uint160', name: 'stopSqrtPriceX96', type: 'uint160' },
-      { internalType: 'uint256', name: 'amountB', type: 'uint256' },
-      { internalType: 'uint256', name: 'amountBMin', type: 'uint256' },
+      { internalType: 'uint256', name: 'amountA', type: 'uint256' },
+      { internalType: 'uint256', name: 'amountAMin', type: 'uint256' },
     ],
     name: 'openSellPosition',
     outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
   },
   {
@@ -515,6 +631,7 @@ const abi_position = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
+  { stateMutability: 'payable', type: 'receive' },
 ];
 
 export { abi_position };

@@ -1,16 +1,20 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Position } from './models/position.model';
-import { PositionsController } from './positions.controller';
-import { PoolsTable } from 'src/common/models/poolsTable.model';
+import { Pools } from 'src/common/models/poolsTable.model';
+import { QueuesModule } from 'src/queues/queues.module';
+import { PoolService } from './pool.service';
+import { RoundRobinService } from './roundRobin.service';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Position, PoolsTable])],
+  imports: [
+    SequelizeModule.forFeature([Position, Pools]),
+    forwardRef(() => QueuesModule),
+  ],
 
-  providers: [PositionsService],
+  providers: [PositionsService, PoolService, RoundRobinService],
 
-  controllers: [PositionsController],
-  exports: [PositionsService],
+  exports: [PositionsService, PoolService],
 })
 export class PositionsModule {}
