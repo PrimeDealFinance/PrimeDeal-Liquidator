@@ -20,11 +20,15 @@ export class SwapEventConsumer {
       );
       // add batch fetch and add to queue
       if (results.length > 0) {
-        for (const position of results) {
-          await this.transactionQueue.add('makeTx', {
-            positionId: position.positionId,
-          });
-        }
+        // for (const position of results) {
+        //   await this.transactionQueue.add('makeTx', {
+        //     positionId: position.positionId,
+        //   });
+        // }
+        const positionsIds = results.map((position) => position.positionId);
+        await this.transactionQueue.add('makeTx', {
+          positionIds: positionsIds,
+        });
         return {
           status: `we have ${results.length} positions to close and we make jobs for them in transaction queue!`,
         };

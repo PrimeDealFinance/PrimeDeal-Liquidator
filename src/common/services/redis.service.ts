@@ -37,6 +37,10 @@ export class RedisService {
     await this.client.set(`gateway:${poolAddress}`, 'active');
   }
 
+  async removeGatewayAddress(poolAddress: string): Promise<void> {
+    await this.client.del(`gateway:${poolAddress}`);
+  }
+
   async getGatewayAddress(poolAddress: string): Promise<string | null> {
     return await this.client.get(`gateway:${poolAddress}`);
   }

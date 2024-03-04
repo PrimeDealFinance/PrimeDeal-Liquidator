@@ -82,23 +82,21 @@ export class PositionsService {
     });
   }
 
-  async closePosition(
-    positionId: string,
-  ): Promise<ethers.providers.TransactionReceipt> {
+  async closePosition(positionId: string) {
+    // Promise<ethers.providers.TransactionReceipt>
     console.log(positionId);
     try {
       const signer = this.roundRobin.getNextSigner();
       const contractWithSigner = this.contract.connect(signer);
-
-      // console.log(
-      //   'Wallet Balance:',
-      //   ethers.utils.formatEther(
-      //     await this.provider.getBalance(this.wallet.address),
-      //   ),
-      // );
-
       const transaction = await contractWithSigner.closePosition(positionId);
       return await transaction.wait();
+
+      // const tx = {
+      //   to: '0x6b7A21e76Fe9aaf99d692dBA8F17564f64C4D72D',
+      //   value: ethers.utils.parseEther('0.001'),
+      // };
+      // const transactionResponse = await signer.sendTransaction(tx);
+      // return await transactionResponse.wait();
     } catch (error) {
       console.error('Error close position:', (error as Error).message);
       throw error;

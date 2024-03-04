@@ -63,6 +63,14 @@ export class AppController {
   }
 
   @ApiExcludeEndpoint()
+  @Get('/delRedis')
+  async delPoolFromRedis() {
+    return await this.redis.removeGatewayAddress(
+      '0x680752645E785B727E9E6Bf1D9d21C5F56175096',
+    );
+  }
+
+  @ApiExcludeEndpoint()
   @Get('/err')
   async getErr() {
     return await this.appService.getErr();
