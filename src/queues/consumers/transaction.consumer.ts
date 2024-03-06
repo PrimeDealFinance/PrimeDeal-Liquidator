@@ -2,31 +2,57 @@ import { Process, Processor } from '@nestjs/bull';
 import { TRANSACTION_QUEUE } from '../../common/constants';
 import { Job } from 'bull';
 import { PositionsService } from 'src/positions/positions.service';
-import * as pMap from 'p-map';
+import * as Bluebird from 'bluebird';
+import { ethers } from 'ethers';
+import { ConfigService } from '@nestjs/config';
 
 @Processor(TRANSACTION_QUEUE)
 export class TransactionConsumer {
-  constructor(private readonly positionsService: PositionsService) {}
+  constructor(
+    private readonly positionsService: PositionsService,
+    private configService: ConfigService,
+  ) {}
 
   @Process('makeTx')
   async handleTransaction(job: Job): Promise<{ status: Array<string> }> {
+    // const concurrencyAmount = +this.configService.get<number>('KEYS_AMOUNT');
     try {
-      const { positionsIds } = job.data;
-
-      const txResponses = await pMap(
-        positionsIds,
-        (positionId: string) => this.positionsService.closePosition(positionId),
+      const { ids } = job.data;
+      const txResponses = await Bluebird.map(
+        ids,
+        async (id: number) => {
+          try {
+            return await this.positionsService.closePosition(id);
+          } catch (error) {
+            console.error(
+              `Error in tx for position with ${id}: ${(error as Error).message}`,
+            );
+            return { error: true, id, message: (error as Error).message };
+          }
+        },
         { concurrency: 2 },
       );
-      const txHashes = txResponses.map(
-        (txResponse) => txResponse.transactionHash,
-      );
-
-      // const txResponse = await this.positionsService.closePosition(positionId);
+      const txHashes = txResponses.map((txResponse) => {
+        if ('error' in txResponse && txResponse.error) {
+          return {
+            txHash: `Error for ID ${txResponse.id}: ${txResponse.message}`,
+            timestamp: new Date().toISOString(),
+          };
+        } else {
+          const successfulResponse =
+            txResponse as ethers.providers.TransactionReceipt;
+          return {
+            txHash: successfulResponse.transactionHash,
+            timestamp: new Date().toISOString(),
+          };
+        }
+      });
 
       return {
-        // status: `txHash is ${txResponse.transactionHash}`,
-        status: txHashes.map((txHash) => `txHash is ${txHash}`),
+        status: txHashes.map(
+          (txInfo, index) =>
+            `txHash ${index + 1} is ${txInfo.txHash} at ${txInfo.timestamp}`,
+        ),
       };
     } catch (error) {
       console.error(

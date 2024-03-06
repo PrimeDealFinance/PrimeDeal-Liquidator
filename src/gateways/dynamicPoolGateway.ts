@@ -13,9 +13,6 @@ export class DynamicPoolGateway {
   private reconnectTimeout?: NodeJS.Timeout;
 
   private initializeProviderAndContract() {
-    // this.provider = new ethers.providers.WebSocketProvider(
-    //   process.env.ALCHEMY_WS_URL,
-    // );
     this.provider = createProviderWs(
       this.configService.get<string>('ALCHEMY_WS_URL'),
     );

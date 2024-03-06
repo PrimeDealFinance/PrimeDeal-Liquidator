@@ -27,7 +27,7 @@ export class SwapEventConsumer {
         // }
         const positionsIds = results.map((position) => position.positionId);
         await this.transactionQueue.add('makeTx', {
-          positionIds: positionsIds,
+          ids: positionsIds,
         });
         return {
           status: `we have ${results.length} positions to close and we make jobs for them in transaction queue!`,

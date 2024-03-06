@@ -15,6 +15,19 @@ export class GatewaysService {
     private configService: ConfigService,
   ) {}
 
+  //FIX optimize redis search
+  // async function checkAndCreateGateway(poolAddress: string): Promise<void> {
+  //   const result = await this.redisService.client.setnx(poolAddress, "gatewayValue");
+
+  //   if (result === 1) {
+  //     console.log(`Creating new gateway for ${poolAddress}`);
+  //     await this.createGateway(poolAddress, this.queueService);
+  //     await this.queueService.addPoll(poolAddress);
+  //   } else {
+  //     console.log(`Gateway for ${poolAddress} already exists.`);
+  //   }
+  // }
+
   async checkGatewayExists(poolAddress: string): Promise<void> {
     const existingPoolGateway =
       await this.redisService.getGatewayAddress(poolAddress);

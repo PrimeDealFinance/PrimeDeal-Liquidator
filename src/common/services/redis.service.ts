@@ -7,6 +7,8 @@ export class RedisService {
 
   constructor() {
     this.client = new Redis('redis://nest-uni-redis:6379');
+    // this.client = new Redis('redis://localhost:6399');
+
     this.testConnection();
   }
 
