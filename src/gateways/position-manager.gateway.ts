@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { abi_position } from '../contracts/positionManager/abi';
 import { QueuesService } from 'src/queues/queues.service';
@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PositionManagerGateway implements OnModuleInit {
+  private readonly logger = new Logger(PositionManagerGateway.name);
   private provider: ethers.providers.WebSocketProvider;
   private contract: ethers.Contract;
   private reconnectTimeout?: NodeJS.Timeout;
@@ -45,12 +46,12 @@ export class PositionManagerGateway implements OnModuleInit {
     this.wsKeepAliveService.keepAlive({
       provider: this.provider,
       onDisconnect: (err) => {
-        console.error('Lost WS connection, try to reconnect...', err);
+        this.logger.error('Lost WS connection, try to reconnect...', err);
         if (this.reconnectTimeout) {
           clearTimeout(this.reconnectTimeout);
         }
         this.reconnectTimeout = setTimeout(() => {
-          console.log('Attempting to reconnect...');
+          this.logger.log('Attempting to reconnect...');
           this.connectAndSubscribe();
         }, 10000);
       },
@@ -77,7 +78,7 @@ export class PositionManagerGateway implements OnModuleInit {
   }
 
   async subscribeToEvents() {
-    console.log('START manager');
+    this.logger.log('START manager');
     this.contract.on(
       'BuyPositionOpened',
       async (positionId, user, stopTick, poolAddress, amountA) => {
@@ -91,7 +92,7 @@ export class PositionManagerGateway implements OnModuleInit {
           ),
           direction: 'buy',
         };
-        console.log('NEW POSITION', JSON.stringify(newPosition));
+        this.logger.log(`NEW POSITION: ${newPosition.positionId}`);
 
         await this.queueService.openPosition(newPosition);
         await this.gatewayService.checkGatewayExists(newPosition.poolAddress);
@@ -120,8 +121,7 @@ export class PositionManagerGateway implements OnModuleInit {
       const closePosition = {
         positionId: Number(positionId),
       };
-      console.log(JSON.stringify(closePosition));
-
+      this.logger.log(`CLOSE POSITION: ${closePosition.positionId}`);
       this.queueService.changePositionStatus(closePosition.positionId);
     });
   }

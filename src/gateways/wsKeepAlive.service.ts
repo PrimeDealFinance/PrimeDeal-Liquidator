@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { KeepAliveParams } from 'src/common/types';
 import { QueuesService } from 'src/queues/queues.service';
 
 @Injectable()
 export class WsKeepAliveService {
+  private readonly logger = new Logger(WsKeepAliveService.name);
+
   constructor(
     private readonly aliveQueue: QueuesService,
     private readonly label: string,
@@ -22,7 +24,8 @@ export class WsKeepAliveService {
     provider._websocket.on('open', () => {
       keepAliveInterval = setInterval(() => {
         provider._websocket.ping();
-        console.log(`Ping ${this.label} ` + new Date().toISOString());
+        this.logger.log(`Ping ${this.label}`);
+
         pingTimeout = setTimeout(() => {
           provider._websocket.terminate();
         }, expectedPongBack);

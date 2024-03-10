@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Position } from './models/position.model';
 import { Pools } from 'src/common/models/poolsTable.model';
@@ -12,6 +12,8 @@ import { RoundRobinService } from './roundRobin.service';
 
 @Injectable()
 export class PositionsService {
+  private readonly logger = new Logger(PositionsService.name);
+
   private readonly contract = new ethers.Contract(
     this.configService.get<string>('PM_CONTRACT_ADDRESS'),
     abi_position,
@@ -34,7 +36,7 @@ export class PositionsService {
       return await this.positionsRepository.create(position);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error(error.errors);
+        this.logger.error(error.errors);
         throw new Error('Validation error');
       }
       throw error;
@@ -65,9 +67,9 @@ export class PositionsService {
   ): Promise<Position[]> {
     return await this.positionsRepository.findAll({
       where: {
-        poolAddress: {
-          [Op.eq]: poolAddress,
-        },
+        // poolAddress: {
+        //   [Op.eq]: poolAddress,
+        // },
         status: {
           [Op.eq]: 'opened',
         },
@@ -91,7 +93,7 @@ export class PositionsService {
       const transaction = await contractWithSigner.closePosition(id);
       return await transaction.wait();
     } catch (error) {
-      console.error('Error close position:', (error as Error).message);
+      this.logger.error('Error close position:', (error as Error).message);
       throw error;
     }
   }

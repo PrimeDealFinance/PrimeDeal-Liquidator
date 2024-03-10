@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { abi_pool } from 'src/contracts/pool/abi';
 import { WsKeepAliveService } from './wsKeepAlive.service';
@@ -8,6 +8,8 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DynamicPoolGateway {
+  private readonly logger = new Logger(DynamicPoolGateway.name);
+
   private provider: ethers.providers.WebSocketProvider;
   private contract: ethers.Contract;
   private reconnectTimeout?: NodeJS.Timeout;
@@ -42,12 +44,12 @@ export class DynamicPoolGateway {
     this.wsKeepAliveService.keepAlive({
       provider: this.provider,
       onDisconnect: (err) => {
-        console.error('Lost WS connection, try to reconnect...', err);
+        this.logger.error('Lost WS connection, try to reconnect...', err);
         if (this.reconnectTimeout) {
           clearTimeout(this.reconnectTimeout);
         }
         this.reconnectTimeout = setTimeout(() => {
-          console.log('Attempting to reconnect...');
+          this.logger.log('Attempting to reconnect...');
           this.connectAndSubscribe();
         }, 10000);
       },
@@ -61,15 +63,14 @@ export class DynamicPoolGateway {
     await this.initializeKeepAlive();
   }
   async subscribeToEvents() {
-    console.log(`NEW WebSocket for pool address: ${this.poolAddress}`);
+    this.logger.log(`NEW WebSocket for pool address: ${this.poolAddress}`);
 
     this.contract.on('Swap', (...args) => {
       const swap = {
         poolAddress: this.poolAddress,
         tick: args[6],
       };
-      console.log('SWAP', swap);
-
+      this.logger.log(`SWAP with ${swap.poolAddress}`);
       this.queueService.addEventToSwapEventQueue(swap);
     });
   }

@@ -3,9 +3,11 @@ import { Job } from 'bull';
 import { POOL_QUEUE } from '../../common/constants';
 import { PoolService } from '../../positions/pool.service';
 import { CreatePoolDtoType } from '../../common/types';
+import { Logger } from '@nestjs/common';
 
 @Processor(POOL_QUEUE)
 export class PoolConsumer {
+  private readonly logger = new Logger(PoolConsumer.name);
   constructor(private readonly poolService: PoolService) {}
 
   @Process('addPool')
@@ -25,7 +27,11 @@ export class PoolConsumer {
       };
       await this.poolService.findOrCreatePool(newPoolAddress, poolData);
     } catch (error) {
-      console.error('Error while working', job.id, error);
+      this.logger.error(
+        'Error while working',
+        job.id,
+        (error as Error).message,
+      );
       throw error;
     }
   }

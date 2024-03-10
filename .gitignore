@@ -45,3 +45,4 @@ migrations
 models 
 Dockerfile
 docker-compose.yaml
+elasticsearch

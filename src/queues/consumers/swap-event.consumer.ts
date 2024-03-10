@@ -2,9 +2,11 @@ import { InjectQueue, Process, Processor } from '@nestjs/bull';
 import { Job, Queue } from 'bull';
 import { SWAP_EVENT, TRANSACTION_QUEUE } from '../../common/constants';
 import { PositionsService } from 'src/positions/positions.service';
+import { Logger } from '@nestjs/common';
 
 @Processor(SWAP_EVENT)
 export class SwapEventConsumer {
+  private readonly logger = new Logger(SwapEventConsumer.name);
   constructor(
     @InjectQueue(TRANSACTION_QUEUE) private transactionQueue: Queue,
     private readonly positionService: PositionsService,
@@ -38,7 +40,7 @@ export class SwapEventConsumer {
         };
       }
     } catch (error) {
-      console.error('Error while job', job.id, error);
+      this.logger.error('Error while job', job.id, (error as Error).message);
       throw error;
     }
   }

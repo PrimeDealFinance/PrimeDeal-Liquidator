@@ -7,10 +7,12 @@ import {
 import { Job } from 'bull';
 import { PositionsService } from '../../positions/positions.service';
 import { POSITION_QUEUE } from '../../common/constants';
+import { Logger } from '@nestjs/common';
 // import { Logger } from '@nestjs/common';
 
 @Processor(POSITION_QUEUE)
 export class PositionConsumer {
+  private readonly logger = new Logger(PositionConsumer.name);
   constructor(private readonly positionsService: PositionsService) {}
 
   @Process('openPosition')
@@ -22,7 +24,11 @@ export class PositionConsumer {
         status: `Position with id: ${newPosition.positionId} is opened`,
       };
     } catch (error) {
-      console.error('Error while working', job.id, error);
+      this.logger.error(
+        'Error while working',
+        job.id,
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -36,7 +42,11 @@ export class PositionConsumer {
       await this.positionsService.changePositionStatus(positionId);
       return { status: `Position with id: ${positionId} is closed` };
     } catch (error) {
-      console.error('Error while changing position status', job.id, error);
+      this.logger.error(
+        'Error while changing position status',
+        job.id,
+        (error as Error).message,
+      );
       throw error;
     }
   }

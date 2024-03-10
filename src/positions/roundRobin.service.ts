@@ -10,8 +10,8 @@ export class RoundRobinService {
 
   constructor(private configService: ConfigService) {
     const keys = [
-      // this.configService.get<string>('PRIVATE_KEY1'),
-      this.configService.get<string>('PRIVATE_KEY2'),
+      // this.configService.get<string>('PRIVATE_KEY2'),
+      this.configService.get<string>('PRIVATE_KEY1'),
     ];
     const provider = createProvider(
       this.configService.get<string>('ALCHEMY_MUMBAI_HTTPS'),

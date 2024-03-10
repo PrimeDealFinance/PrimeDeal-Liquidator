@@ -1,19 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RedisService } from './common/services/redis.service';
-// import { GatewayFactory } from './gateways/dynamicGateway/gatewayFactory';
-// import { QueueService } from './common/services/queue.service';
 import { Pools } from './common/models/poolsTable.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { QueuesService } from './queues/queues.service';
 import { GatewaysService } from './gateways/gateways.service';
+import { extractErrorLocation } from './common/utils/errorStack';
 
 @Injectable()
 export class AppService {
+  private readonly logger = new Logger(AppService.name);
   constructor(
     private readonly redisService: RedisService,
     private readonly gatewayService: GatewaysService,
-    // private readonly gatewayFactory: GatewayFactory,
-
     private readonly queueService: QueuesService,
 
     @InjectModel(Pools) private readonly poolsRepository: typeof Pools,
@@ -44,11 +42,19 @@ export class AppService {
     return 'Hello UniSwap!!!!!';
   }
 
+  async delPoolFromRedis() {
+    return await this.redisService.removeGatewayAddress(
+      '0xeC617F1863bdC08856Eb351301ae5412CE2bf58B',
+    );
+  }
+
   getErr() {
     try {
       throw new Error('hello');
     } catch (error) {
-      console.log(error);
+      const errorLocation = extractErrorLocation((error as Error).stack || '');
+
+      this.logger.error((error as Error).message, errorLocation);
     }
   }
 

@@ -1,4 +1,3 @@
-import { RedisService } from './common/services/redis.service';
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PositionsService } from './positions/positions.service';
@@ -9,7 +8,6 @@ import { PositionManagerGateway } from './gateways/position-manager.gateway';
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly redis: RedisService,
     private readonly positionsService: PositionsService,
     private positionManagerGateway: PositionManagerGateway,
   ) {}
@@ -18,12 +16,7 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  @ApiExcludeEndpoint()
-  @Get('/test')
-  async test() {
-    await this.redis.testConnection();
-    return 'Redis test completed';
-  }
+
   @ApiOperation({ summary: 'End-point for getting info about pools' })
   @ApiResponse({
     status: 200,
@@ -51,28 +44,14 @@ export class AppController {
   }
 
   @ApiExcludeEndpoint()
-  @Get('/redis')
-  async getPoolsFromRedis() {
-    return await this.redis.getActivePoolAddresses();
-  }
-
-  @ApiExcludeEndpoint()
-  @Get('/db')
-  async getPoolsFromDB() {
-    return await this.appService.activePools();
-  }
-
-  @ApiExcludeEndpoint()
   @Get('/delRedis')
   async delPoolFromRedis() {
-    return await this.redis.removeGatewayAddress(
-      '0x680752645E785B727E9E6Bf1D9d21C5F56175096',
-    );
+    return await this.appService.delPoolFromRedis();
   }
 
   @ApiExcludeEndpoint()
   @Get('/err')
-  async getErr() {
-    return await this.appService.getErr();
+  getErr() {
+    return this.appService.getErr();
   }
 }

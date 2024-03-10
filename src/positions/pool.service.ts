@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { abi_pool } from 'src/contracts/pool/abi';
 import { InjectModel } from '@nestjs/sequelize';
@@ -9,6 +9,8 @@ import { createProvider } from 'src/common/utils/providers';
 
 @Injectable()
 export class PoolService {
+  private readonly logger = new Logger(PoolService.name);
+
   constructor(
     @InjectModel(Pools)
     private readonly poolsRepository: typeof Pools,
@@ -17,7 +19,7 @@ export class PoolService {
   private readonly provider = createProvider(
     this.configService.get<string>('ALCHEMY_MUMBAI_HTTPS'),
   );
-  //
+
   async getTokens(
     newPoolAddress: string,
   ): Promise<{ tokenA: string; tokenB: string }> {
@@ -31,7 +33,10 @@ export class PoolService {
       const tokenB = await contract.token1();
       return { tokenA, tokenB };
     } catch (error) {
-      console.error('Error get tokens from pool:', (error as Error).message);
+      this.logger.error(
+        'Error get tokens from pool:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -45,7 +50,7 @@ export class PoolService {
       );
       return await contract.symbol();
     } catch (error) {
-      console.error('Error get token symbol:', (error as Error).message);
+      this.logger.error('Error get token symbol:', (error as Error).message);
       throw error;
     }
   }
@@ -61,10 +66,11 @@ export class PoolService {
     });
 
     if (created) {
-      console.log('Pool created');
+      this.logger.log(`Pool created`);
+
       return pool;
     } else {
-      console.log('Pool already exists');
+      this.logger.log(`Pool already exists`);
       return pool;
     }
   }

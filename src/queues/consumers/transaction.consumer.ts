@@ -5,9 +5,12 @@ import { PositionsService } from 'src/positions/positions.service';
 import * as Bluebird from 'bluebird';
 import { ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 
 @Processor(TRANSACTION_QUEUE)
 export class TransactionConsumer {
+  private readonly logger = new Logger(TransactionConsumer.name);
+
   constructor(
     private readonly positionsService: PositionsService,
     private configService: ConfigService,
@@ -15,7 +18,7 @@ export class TransactionConsumer {
 
   @Process('makeTx')
   async handleTransaction(job: Job): Promise<{ status: Array<string> }> {
-    // const concurrencyAmount = +this.configService.get<number>('KEYS_AMOUNT');
+    const concurrencyAmount = +this.configService.get<number>('KEYS_AMOUNT');
     try {
       const { ids } = job.data;
       const txResponses = await Bluebird.map(
@@ -24,13 +27,13 @@ export class TransactionConsumer {
           try {
             return await this.positionsService.closePosition(id);
           } catch (error) {
-            console.error(
+            this.logger.error(
               `Error in tx for position with ${id}: ${(error as Error).message}`,
             );
             return { error: true, id, message: (error as Error).message };
           }
         },
-        { concurrency: 2 },
+        { concurrency: concurrencyAmount },
       );
       const txHashes = txResponses.map((txResponse) => {
         if ('error' in txResponse && txResponse.error) {
@@ -55,7 +58,7 @@ export class TransactionConsumer {
         ),
       };
     } catch (error) {
-      console.error(
+      this.logger.error(
         `Error processing transaction for position: ${
           (error as Error).message
         }`,

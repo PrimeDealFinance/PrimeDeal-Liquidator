@@ -7,32 +7,18 @@ export class RedisService {
 
   constructor() {
     this.client = new Redis('redis://nest-uni-redis:6379');
-    // this.client = new Redis('redis://localhost:6399');
-
-    this.testConnection();
+    // this.client = new Redis('redis://localhost:6399', {
+    //   maxRetriesPerRequest: 50,
+    // });
   }
 
-  onModuleInit() {
-    console.log('Redis is connected');
-  }
+  // onModuleInit() {
+  //   console.log('Redis is connected');
+  // }
 
   onModuleDestroy() {
     this.client.disconnect();
-    console.log('Redis is disconnected');
-  }
-
-  // FIX DEL
-  async testConnection() {
-    this.client.on('connect', () => console.log('Redis Client Connected'));
-    this.client.on('error', (err) => console.log('Redis Client Error', err));
-
-    try {
-      await this.client.set('test', 'TEST RECORD');
-      const value = await this.client.get('test');
-      console.log('Redis test value:', value);
-    } catch (error) {
-      console.error('Redis testConnection error:', error);
-    }
+    // console.log('Redis is disconnected');
   }
 
   async setGatewayAddress(poolAddress: string): Promise<void> {

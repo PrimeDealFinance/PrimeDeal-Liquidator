@@ -10,7 +10,7 @@ migrations
 models 
 Dockerfile
 docker-compose.yaml
-
+elesticsearch
 
 # Environment files
 .env
